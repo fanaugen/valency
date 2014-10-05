@@ -6,11 +6,12 @@
       <h1 class="pull-left">
         <%= @language %>
         <% if @iso_code %>
-          <a title="Look up ISO code in Glottolog" href="http://www.glottolog.org/glottolog/?iso=<%= @iso_code %>" 
-             class="label"><%= @iso_code %></a>
-          <a title="Look up in WALS" href="http://wals.info/languoid/by_code/iso_639_3_<%= @iso_code %>">
-            <%= image_tag('icons/wals.png', size: '16x16') %>
-          </a>
+          <a title="Look up ISO code in Glottolog" href="http://glottolog.org/resource/languoid/iso/<%= @iso_code %>" 
+             class="label" style="font-weight:normal;font-size:50%"><%= @iso_code %></a>
+             <% if !@iso_code.nil? && !@iso_code.match(/(ctn|czn|sci|ngh|nqn|jpn\-hok)/) %>
+               <a title="Look up in WALS" href="http://wals.info/languoid/by_code/iso_639_3_<%= @iso_code %>">
+               <%= image_tag('icons/wals.png', size: '16x16') %></a>
+             <% end %>
         <% end %>
       </h1>
       <div class="btn-group with-heading"><%= prev_next_links(@languages, @language) %></div>
@@ -36,7 +37,7 @@
         </tr>
       <% end %>
     </table>
-    
+
     <%= gmaps({
       map_options: {
         container_class: "map_container single",
@@ -75,18 +76,136 @@
         <b>with data contributions by <%= pluralize @native_speakers.size, "native speaker" %></b>
       </div>
     <% end %>
+    
+    <% if @refs && @refs.count > 0 %>
+          <a href="#myModal4" role="button" class="btn" style="font-weight:normal;margin-top:10px" data-toggle="modal"><%= (@refs.count > 1) ? "#{@refs.count} " : "" %>Reference<%= (@refs.count > 1) ? "s" : "" %></a>
+          <div id="myModal4" class="modal hide fade" style="width:700px" tabindex="-1" role="dialog" aria-labelledby="myModal4" aria-hidden="true">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+              <h3 id="myModal4">Reference<%= (@refs.count > 1) ? "s" : "" %> for <%= @language %></h3>
+            </div>
+            <div class="modal-body" style="color:#000;font-height:normal;font-size:11pt;font-weight:normal;">
+                <ul>
+                  <% @refs.each do |r| %>
+                  <% rm = "" %>
+                  <% if r.authors %>
+                    <% rm << "#{r.authors}" %>
+                    <% if (r.year.to_i > 0) %>
+                      <% rm << ". #{r.year.to_i.to_s}" %>
+                    <% end %>
+                    <% rm << ".<br />&nbsp;&nbsp;"%>
+                  <% end %>
+                  <% if r.article_title %>
+                    <% rm << "“#{r.article_title}”"%>
+                  <% end %>
+                  <% if r.book_title %>
+                    <% if r.article_title %>
+                      <% rm << " In: "%>
+                    <% end %>
+                    <% rm << "“#{r.book_title}”"%>
+                  <% end %>
+                  <li><%= content_tag(:a, rm.html_safe(), href: "/references/#{r.id}") %></li>
+                  <% end %>
+                <ul>
+            </div>
+          </div>
+    
+    <% end %>
+    
   </div><!-- .span6 -->
 </div><!-- .row -->
 
 <div class="row">
   <div class="span12">
-    <h2>Data</h2>
-    <% readable = {'verbs'=>'Verb forms', 'examples'=>'glossed Examples'} %>
-    <% %w(verbs coding_frames alternations examples).each do |resource| %>
-      <% name = readable[resource] || resource.humanize %>
-        <%= link_to "#{@language.send(resource).count} #{name}", send("language_#{resource}_path", @language), class: 'btn' %>
-    <% end %>
+
+<h2>How to cite the <%= @language %> dataset&nbsp;
+    
+    <a href="#myModal" role="button" class="label" style="font-weight:normal;" data-toggle="modal">BibTeX</a>
+    <!-- Modal -->
+    <div id="myModal" class="modal hide fade" style="width:700px" tabindex="-1" role="dialog" aria-labelledby="myModalBibTeX" aria-hidden="true">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="myModalBibTeX">BibTeX</h3>
+      </div>
+      <div class="modal-body modal-cite">
+@inbook{valpal-<%=request.path_parameters[:id]%>,<br />
+&nbsp;&nbsp;publisher = {Max Planck Institute for Evolutionary Anthropology},<br />
+&nbsp;&nbsp;author    = {<%= swap_contibutors_name %>},<br />
+&nbsp;&nbsp;url       = {http://valpal.info<%=request.fullpath%>},<br />
+&nbsp;&nbsp;booktitle = {Valency Patterns Leipzig},<br />
+&nbsp;&nbsp;year      = {2013},<br />
+&nbsp;&nbsp;editor    = {Hartmann, Iren &amp; Haspelmath, Martin &amp; Taylor, Bradley (eds.)},<br />
+&nbsp;&nbsp;address   = {Leipzig},<br />
+&nbsp;&nbsp;title     = {<%= @language %> Valency Patterns}<br />
+}
+      </div>
+    </div>    
+</h2>
+
+<div style="width:450px;padding:2px;position:relative;left:10px;bottom:-5px;background-color:#eeaa11;text-align:center;font-size:10pt">Please do <b>not</b> cite the ValPaL <b>pre-release</b> version in any scientific work!</div><pre style="margin:auto; display:inline-block;"><small><%= swap_contibutors_name %>. 2013. <%= @language %> Valency Patterns.
+In: Hartmann, Iren &amp; Haspelmath, Martin &amp; Taylor, Bradley (eds.) 2013.
+Valency Patterns Leipzig.
+Leipzig: Max Planck Institute for Evolutionary Anthropology.
+(Available online at http://valpal.info<%=request.fullpath%>, Accessed on <%= Time.now.strftime("%Y-%m-%d") %>)</small></pre>
+    
+
   </div>
 </div>
+<h2>Data</h2>
+<% readable = {'verbs'=>'Verb forms', 'examples'=>'glossed Examples'} %>
+<% %w(verbs coding_frames alternations examples).each do |resource| %>
+  <% name = readable[resource] || resource.humanize %>
+  <%if resource == 'coding_frames'%>
+    <%= link_to "#{@language.send(resource).where(derived:'Basic').count} #{name}", send("language_#{resource}_path", @language), class: 'btn' %>
+  <% else %>
+    <% if resource == 'alternations' %>
+      <%= link_to "#{@language.send(resource).count} #{name}#{@data_available}", send("language_#{resource}_path", @language), class: 'btn' %>
+    <% else %>
+      <%= link_to "#{@language.send(resource).count} #{name}", send("language_#{resource}_path", @language), class: 'btn' %>
+    <% end %>
+  <% end %>
+<% end %>
 
-<!-- all comments hidden for now -->
+<% if @language.comments || @language.characterization_of_flagging_resources || @language.characterization_of_indexing_resources || @language.characterization_of_ordering_resources || @language.data_sources_generalizations_contributor_backgrounds || @language.alternation_occurs_judgement_criteria %>
+<div class="row">
+  <div class="span12">
+    <h2 style="margin-bottom:0px">Comments</h2>
+  </div>
+  <% if @language.comments %>
+    <div class="span12">
+      <h3>General comment</h3>
+      <p><%= raw @language.comments %></p>
+    </div>
+  <% end %>
+  <% if @language.characterization_of_flagging_resources %>
+    <div class="span12">
+      <h3>Characterization of flagging resources</h3>
+      <p><%= raw @language.characterization_of_flagging_resources %></p>
+    </div>
+  <% end %>
+  <% if @language.characterization_of_indexing_resources %>
+    <div class="span12">
+      <h3>Characterization of indexing resources</h3>
+      <p><%= raw @language.characterization_of_indexing_resources %></p>
+    </div>
+  <% end %>
+  <% if @language.characterization_of_ordering_resources %>
+    <div class="span12">
+      <h3>Characterization of ordering resources</h3>
+      <p><%= raw @language.characterization_of_ordering_resources %></p>
+    </div>
+  <% end %>
+  <% if @language.alternation_occurs_judgement_criteria %>
+    <div class="span12">
+      <h3>Criteria used when judging if an alternation occurs regularly/marginally/never</h3>
+      <p><%= raw @language.alternation_occurs_judgement_criteria %></p>
+    </div>
+  <% end %>
+  <% if @language.data_sources_generalizations_contributor_backgrounds %>
+    <div class="span12">
+      <h3>Source of the data and generalizations/background of the contributor(s)</h3>
+      <p><%= raw @language.data_sources_generalizations_contributor_backgrounds %></p>
+    </div>
+  <% end %>
+<% end %>
+</div>

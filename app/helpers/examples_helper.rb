@@ -1,6 +1,16 @@
 # coding: utf-8
 module ExamplesHelper
-  
+
+  def swap_contibutors_name
+    n = Array.new
+    @contributors.each do |c|
+      a = c.name
+      ix = a.rindex(/ +/)
+      n.push(a[ix+1..a.length] + ", " + a[0,ix])
+    end
+    n.join(' & ')
+  end
+
   # returns a div with class "gloss-unit" for each gloss to be aligned
   def format_gloss ex
     return '&nbsp;'.html_safe unless ex.analyzed_text.respond_to? :split
@@ -52,7 +62,7 @@ module ExamplesHelper
     
     link_or_text = link_to_if(wrap, first_line, [@language, ex], title: link_title)
     transl = "‘#{ex.translation}’" unless ex.translation.blank?
-    
+ 
     rendered_example = content_tag(:div, link_or_number.html_safe, class: "number")
     unless link_or_text.blank?
       rendered_example << content_tag(:div, class: "body") do
@@ -62,10 +72,88 @@ module ExamplesHelper
         content_tag(:div, transl, class: "translation")
       end
     end
+
+    # for linked examples show star at the end of the example
+    if number_as_link or wrap
+      rendered_example << render_comment(ex)
+    end
     
     # wrap it in a <div> and serve it
     div_for(ex, class: css_class) { rendered_example }
     
+  end
+
+  def render_comment ex
+    sym = content_tag(:span, "★", title: "Click here for additional information")
+    d = ""
+    if ex.translation_other
+      d << content_tag(:h3, "Other translation")
+      olg = Languageref.find_by_id(ex.language_id_translation_other)
+      otrans = ""
+      if not olg.nil?
+        otrans << content_tag(:i, "#{olg.name}:") << " #{ex.translation_other}"
+      else
+        otrans << ex.translation_other
+      end
+      d << content_tag(:p, otrans.html_safe, style: "margin-top:-9px")
+    end
+    if ex.comment
+      c = ex.comment
+      d << content_tag(:h3, "Comment")
+      d << content_tag(:p, c.html_safe, style: "margin-top:-9px")
+    end
+    if ex.example_type
+      d << content_tag(:h3, "Example type")
+      d << content_tag(:p, ex.example_type, style: "margin-top:-9px")
+    end
+    if ex.reference_id
+      d << content_tag(:h3, "Reference")
+      @ref = Reference.find_by_id(ex.reference_id)
+      if @ref
+        r = ""
+        if @ref.authors
+          a = @ref.authors
+          na = ""
+          a.split(/ +and +/).each do |fn|
+            fn1 = fn.split(/\s*,\s*/)
+            na << fn1[0]
+          end
+          r = "#{na}"
+        end
+        if @ref.year.to_i == 0
+          r << " (#{@ref.article_title})"
+        else
+          r << " #{@ref.year.to_i}#{@ref.year_disambiguation_letter}"
+        end
+        if ex.reference_pages
+          if ex.reference_pages.match(/^\d+$/)
+            r << ", p. #{ex.reference_pages}"
+          elsif ex.reference_pages.match(/^\d+[\-\/]\d+$/)
+            r << ", pp. #{ex.reference_pages}"
+          end
+        end
+        d << content_tag(:p, "#{r}&nbsp;".html_safe << content_tag(:a, "⇢", href: "/references/#{ex.reference_id}"), style: "margin-top:-9px")
+      end
+    end
+    d << content_tag(:h3, "Example as plain text for copying")
+    d << "<pre>"
+    if ex.original_orthography
+      d << "#{ex.original_orthography}<br />"
+    end
+    if ex.primary_text
+      d << "#{ex.primary_text}<br />"
+    end
+    
+    d << "#{ex.analyzed_text}<br />#{ex.gloss}<br />#{ex.translation}"
+    d << "<small><br /><br /><i>Cite:</i><br />"
+    d << "#{@language} example No. #{ex.number}<br />In: #{swap_contibutors_name} 2013. #{@language} Valency Patterns.
+In: Hartmann, Iren &amp; Haspelmath, Martin &amp; Taylor, Bradley (eds.) 2013.
+Valency Patterns Leipzig.
+Leipzig: Max Planck Institute for Evolutionary Anthropology.
+(Available online at http://valpal.info/languages/#{params[:language_id]}/examples/#{ex.number}, Accessed on #{Time.now.strftime('%Y-%m-%d')})"
+    d << "</pre>"
+    com = content_tag(:a, sym, rel: "popover", class: "info cursor-hand", title: "#{@language} example No. #{ex.number}", :data => {:content => d})
+    com
   end
   
 end

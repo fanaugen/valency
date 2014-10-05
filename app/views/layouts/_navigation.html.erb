@@ -2,7 +2,7 @@
 <!-- this is rendered in the top navbar -->
 <div class="navbar-inner">
   <%= link_to root_path, class: 'logo', title: "Home" do %>
-    <%= image_tag 'logo_valpal_80.png' %>
+    <%= image_tag('logo_valpal_100.png', size: '80x80')  %>
   <% end %>
   <div class="container">
 
@@ -10,7 +10,7 @@
       <!-- Languages dropdown -->
       <li class="dropdown" id="language_dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-          Language contributions <b class="caret"></b>
+          Language&nbsp;contributions&nbsp;<b class="caret"></b>
         </a>
         <ul class="dropdown-menu">
           <li><%= link_to "All languages", languages_path %></li>
@@ -23,7 +23,7 @@
       <!-- Meanings dropdown -->
       <li class="dropdown <%= 'active' if controller_name == 'meanings' %>" id="meaning_dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-          Verb meanings <b class="caret"></b>
+          Verb&nbsp;meanings&nbsp;<b class="caret"></b>
         </a>
         <ul class="dropdown-menu">
           <div class="caption">
@@ -55,28 +55,31 @@
       
       <li class="dropdown" id="about_dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-          About <b class="caret"></b>
+          About&nbsp;<b class="caret"></b>
         </a>
         <ul class="dropdown-menu">
-          <li><a href="#">Project description</a></li>
-          <li><a href="#">The Database</a></li>
+          <li><a href="/about/project">Project description</a></li>
+          <li><a href="/about/database">Database manual</a></li>
           <li class="divider"></li>
-          <li><a href="#">Help</a></li>
-          <li><a href="#">Contact</a></li>
-          <li><a href="#">Imprint</a></li>
+          <li><a href="/about/credits">Credits</a></li>
+          <li class="divider"></li>
+          <li><a href="/about/contact">Contact</a></li>
+          <li><a href="/about/imprint">Imprint</a></li>
+          <li class="divider"></li>
+          <li><a href="/about/browser_support">Browser Support</a></li>
         </ul>
       </li>
       <li class="divider-vertical"></li>
 
       <li class="dropdown" id="export_dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-          Export <b class="caret"></b>
+          Export&nbsp;<b class="caret"></b>
         </a>
         <ul class="dropdown-menu">
-          <% if @language %>
+          <!-- <% if @language %>
             <li><a href="#">Data set for <%= @language.to_s %></a></li>
-          <% end %>
-          <li><a href="#">The entire Database</a></li>
+          <% end %> -->
+          <li><a href="#">Coming soon</a></li>
         </ul>
       </li>
       <li class="divider-vertical"></li>
@@ -109,14 +112,14 @@
 
     <% unless lang # no current language %>
       <li id="verb_dropdown" class="disabled">
-        <a>Verb forms</a>
+        <a>Verb&nbsp;forms</a>
       </li>
     <% else # a language is selected %>
     
     <!-- Verb forms dropdown (w/ meanings) -->			  
     <li class="dropdown<%= ' active' if controller_name == 'verbs' %>" id="verb_dropdown">
       <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-        Verb forms <b class="caret"></b>
+        Verb&nbsp;forms&nbsp;<b class="caret"></b>
       </a>
       <ul class="dropdown-menu hover-items">
         <div class="caption">
@@ -154,7 +157,19 @@
 
     <li class="divider-vertical"></li>
     
-    <%= submenu_items %w(coding_frames coding_sets alternations examples), divider='divider-vertical' %>
+    <%= submenu_items %w(coding_frames), divider='divider-vertical' %>
+    <li class="divider-vertical"></li>
+    <li class="dropdown" id="dummy_dropdown">
+      <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+        Coding&nbsp;sets
+      </a>
+      <ul class="dropdown-menu">
+        <li><a href="#">Coming soon</a></li>
+      </ul>
+    </li>
+    <li class="divider-vertical"></li>
+    
+    <%= submenu_items %w(alternations examples), divider='divider-vertical' %>
     
     <li class="divider-vertical"></li>
     

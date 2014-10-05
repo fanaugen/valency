@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130818111418) do
+ActiveRecord::Schema.define(:version => 20131029120000) do
 
   create_table "alternation_values", :id => false, :force => true do |t|
     t.integer "verb_id",                 :limit => 8
@@ -118,16 +118,17 @@ ActiveRecord::Schema.define(:version => 20130818111418) do
   add_index "contributions", ["person_id"], :name => "index_contributions_on_person_id"
 
   create_table "examples", :id => false, :force => true do |t|
-    t.integer "id",                   :limit => 8
-    t.integer "language_id",          :limit => 8
-    t.integer "reference_id",         :limit => 8
-    t.integer "person_id",            :limit => 8
+    t.integer "id",                            :limit => 8
+    t.integer "language_id",                   :limit => 8
+    t.integer "reference_id",                  :limit => 8
+    t.integer "person_id",                     :limit => 8
     t.string  "primary_text"
     t.text    "original_orthography"
     t.string  "analyzed_text"
     t.string  "gloss"
     t.text    "translation"
     t.text    "translation_other"
+    t.integer "language_id_translation_other",  :limit => 8
     t.text    "comment"
     t.string  "media_file_name"
     t.string  "media_file_timecode"
@@ -160,14 +161,21 @@ ActiveRecord::Schema.define(:version => 20130818111418) do
   add_index "gloss_meanings", ["gloss"], :name => "index_gloss_meanings_on_gloss"
   add_index "gloss_meanings", ["language_id"], :name => "index_gloss_meanings_on_language_id"
 
+  create_table "languagerefs", :id => false, :force => true do |t|
+    t.integer  "id",                                                   :limit => 8
+    t.string   "name"
+    t.float    "nodata"
+  end
+
+  add_index "languagerefs", ["id"], :name => "index_languageref_on_id", :unique => true
+
   create_table "languages", :id => false, :force => true do |t|
     t.integer  "id",                                                   :limit => 8
     t.string   "name"
     t.string   "iso_code"
+    t.string   "glottolog_code"
     t.string   "family"
     t.string   "variety"
-    t.datetime "created_at",                                                        :null => false
-    t.datetime "updated_at",                                                        :null => false
     t.text     "alternation_occurs_judgement_criteria"
     t.text     "characterization_of_flagging_resources"
     t.text     "characterization_of_indexing_resources"
@@ -251,13 +259,15 @@ ActiveRecord::Schema.define(:version => 20130818111418) do
     t.string  "latex_cite_key"
     t.text    "additional_information"
     t.text    "full_reference"
+    t.integer "language_id",                 :limit => 8
+    t.string  "short_citation"
   end
 
   add_index "references", ["id"], :name => "index_references_on_id", :unique => true
 
   create_table "terms", :force => true do |t|
     t.string "term"
-    t.string "description"
+    t.text   "description"
     t.text   "definition"
     t.string "see_also"
   end
