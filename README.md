@@ -1,4 +1,5 @@
 ## Valency Online 
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/fanaugen/valency?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 This is the code repository for the Rails app that will present the Leipzig Valency Classes Project's data as an searchable interactive online resource.
 
